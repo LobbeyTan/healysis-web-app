@@ -1,0 +1,12 @@
+[
+    {
+        "origin": [
+            "*"
+        ],
+        "method": [
+            "*"
+        ],
+        "maxAgeSeconds": 3600
+    }
+]
+
