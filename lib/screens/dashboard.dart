@@ -401,7 +401,7 @@ class TextCountWidget extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(30),
             child: Image.asset(
-              "search_text.png",
+              "images/search_text.png",
             ),
           ),
           Column(

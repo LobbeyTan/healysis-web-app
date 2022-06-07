@@ -77,9 +77,10 @@ class MainMenu extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 60),
       child: Column(
         children: [
-          const CircleAvatar(
+          CircleAvatar(
             backgroundColor: Colors.white,
             radius: 35,
+            child: Image.asset("images/avatar.png"),
           ),
           const SizedBox(
             height: 10,
@@ -113,8 +114,7 @@ class MainMenu extends StatelessWidget {
                 title: kMenuItem[i]['title'] ?? "",
                 isSelected: pageRoute == kMenuItem[i]['route'],
                 onPressed: () => {
-                  Navigator.popAndPushNamed
-                  (context, kMenuItem[i]['route']),
+                  Navigator.popAndPushNamed(context, kMenuItem[i]['route']),
                 },
               ),
               separatorBuilder: (BuildContext context, i) =>

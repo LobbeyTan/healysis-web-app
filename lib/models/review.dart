@@ -153,9 +153,12 @@ class ReviewModel {
     String filter = "none",
   }) {
     if (filter == "none") {
-      return collection.snapshots();
+      return collection
+          .orderBy("createdTime", descending: true)
+          .limit(100)
+          .snapshots();
     } else {
-      return collection.where(field, isEqualTo: filter).snapshots();
+      return collection.where(field, isEqualTo: filter).limit(100).snapshots();
     }
   }
 
