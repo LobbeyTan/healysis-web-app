@@ -102,7 +102,7 @@ class AnalyticScreen extends StatelessWidget {
                             Expanded(
                               child: CardContainer(
                                 child: Top30Words(
-                                  maxY: 30,
+                                  maxY: 150,
                                   title: "Top 15 Positive Emotion Words",
                                   data: (snapshot.data!["pos_count"]!
                                           as List<dynamic>)
@@ -114,7 +114,7 @@ class AnalyticScreen extends StatelessWidget {
                             Expanded(
                               child: CardContainer(
                                 child: Top30Words(
-                                  maxY: 150,
+                                  maxY: 700,
                                   title: "Top 15 Negative Emotion Words",
                                   data: (snapshot.data!["neg_count"]!
                                           as List<dynamic>)
@@ -701,23 +701,23 @@ class _ReviewsCountLineChartState extends State<ReviewsCountLineChart> {
     );
     String text;
     switch (value.toInt()) {
-      case 10:
-        text = '10';
-        break;
-      case 30:
-        text = '30';
-        break;
       case 50:
         text = '50';
         break;
-      case 70:
-        text = '70';
+      case 100:
+        text = '100';
         break;
-      case 90:
-        text = '90';
+      case 150:
+        text = '150';
         break;
-      case 110:
-        text = '110';
+      case 200:
+        text = '200';
+        break;
+      case 250:
+        text = '250';
+        break;
+      case 300:
+        text = '300';
         break;
       default:
         return Container();
@@ -736,7 +736,7 @@ class _ReviewsCountLineChartState extends State<ReviewsCountLineChart> {
         getDrawingHorizontalLine: (value) {
           return FlLine(
             color: const Color(0xff37434d),
-            strokeWidth: (value.toInt() % 10 == 0) ? 1 : 0,
+            strokeWidth: (value.toInt() % 35 == 0) ? 1 : 0,
           );
         },
         getDrawingVerticalLine: (value) {
@@ -781,7 +781,7 @@ class _ReviewsCountLineChartState extends State<ReviewsCountLineChart> {
       minX: 0,
       maxX: 6,
       minY: 30,
-      maxY: 120,
+      maxY: 350,
       lineBarsData: [
         LineChartBarData(
           spots: widget.reviewCount

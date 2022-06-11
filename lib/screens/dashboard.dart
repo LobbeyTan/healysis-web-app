@@ -343,25 +343,16 @@ class _ReviewAnalysisWidgetState extends State<ReviewAnalysisWidget> {
                   icon: (context.read<SpeechToTextController>().isListening)
                       ? Icons.mic
                       : Icons.mic_off,
-                  onPressed: () => {
-                    setState(
-                      () {
-                        if (context
-                            .read<SpeechToTextController>()
-                            .isListening) {
-                          context.read<SpeechToTextController>().stop();
-                        } else {
-                          context.read<SpeechToTextController>().listen(((p0) {
-                            setState(() {
-                              if (p0.isConfident()) {
-                                widget.controller.text +=
-                                    "${p0.recognizedWords} ";
-                              }
-                            });
-                          }));
-                        }
-                      },
-                    )
+                  onPressed: () {
+                    if (context.read<SpeechToTextController>().isListening) {
+                      context.read<SpeechToTextController>().stop();
+                    } else {
+                      context.read<SpeechToTextController>().listen(((result) {
+                        widget.controller.text = result.recognizedWords;
+                        log("Recognized words: ${result.recognizedWords}");
+                      }));
+                    }
+                    setState(() {});
                   },
                 ),
                 const Expanded(child: SizedBox()),
