@@ -17,6 +17,9 @@ import 'package:web_app/widgets/layout.dart';
 import 'package:web_app/widgets/menu.dart';
 import 'package:web_app/widgets/text_field.dart';
 
+typedef DashboardState = ValueNotifier<Map<String, dynamic>>;
+typedef IDType = ValueNotifier<String?>;
+
 class DashboardScreen extends StatelessWidget {
   static const pageRoute = "/";
 
@@ -24,62 +27,82 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => ValueNotifier<Map<String, num>>({
-        'pos': 0,
-        'neg': 0,
-        'neu': 0,
-        'cnt': 0,
-      }),
-      builder: ((context, child) => MyCustomLayout(
-            pageRoute: pageRoute,
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 7,
-                  child: Column(
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: Row(
-                          children: const [
-                            Expanded(
-                              flex: 1,
-                              child: RingChartWidget(),
-                            ),
-                            Expanded(
-                              flex: 1,
-                              child: TextCountWidget(),
-                            ),
-                          ],
-                        ),
+    const Map<String, dynamic> initialState = {
+      'pos': 0,
+      'neg': 0,
+      'neu': 0,
+      'cnt': 0,
+      'txt': 0,
+      'h-score': 0,
+      'h-label': 'Undefined',
+    };
+
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => DashboardState(initialState),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => IDType(null),
+        ),
+      ],
+      builder: ((context, child) {
+        final controller = TextEditingController();
+
+        return MyCustomLayout(
+          pageRoute: pageRoute,
+          child: Row(
+            children: [
+              Expanded(
+                flex: 7,
+                child: Column(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: Row(
+                        children: const [
+                          Expanded(
+                            flex: 1,
+                            child: RingChartWidget(),
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: TextCountWidget(),
+                          ),
+                        ],
                       ),
-                      const Expanded(
-                        flex: 7,
-                        child: ReviewAnalysisWidget(),
-                      ),
-                    ],
-                  ),
-                ),
-                const Expanded(
-                  flex: 3,
-                  child: CardContainer(
-                    child: Padding(
-                      padding: EdgeInsets.all(30),
-                      child: ReviewsWidget(),
                     ),
+                    Expanded(
+                      flex: 7,
+                      child: ReviewAnalysisWidget(
+                        controller: controller,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                flex: 3,
+                child: CardContainer(
+                  child: Padding(
+                    padding: const EdgeInsets.all(30),
+                    child: ReviewsWidget(controller: controller),
                   ),
                 ),
-              ],
-            ),
-          )),
+              ),
+            ],
+          ),
+        );
+      }),
     );
   }
 }
 
 class ReviewsWidget extends StatelessWidget {
+  final TextEditingController controller;
   const ReviewsWidget({
     Key? key,
+    required this.controller,
   }) : super(key: key);
 
   @override
@@ -162,7 +185,10 @@ class ReviewsWidget extends StatelessWidget {
                         const SizedBox(
                           height: 40,
                         ),
-                        ReviewsList(reviews: reviews)
+                        ReviewsList(
+                          reviews: reviews,
+                          controller: controller,
+                        )
                       ]),
                 );
               }
@@ -196,11 +222,13 @@ class ReviewsWidget extends StatelessWidget {
 }
 
 class ReviewsList extends StatelessWidget {
+  final TextEditingController controller;
   final List<Review> reviews;
 
   const ReviewsList({
     this.reviews = const [],
     Key? key,
+    required this.controller,
   }) : super(key: key);
 
   @override
@@ -213,43 +241,66 @@ class ReviewsList extends StatelessWidget {
         itemBuilder: (context, i) {
           Review review = reviews[i];
 
-          return Container(
-            height: 170,
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.end,
+          return MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: () => {
+                context.read<IDType>().value = review.id,
+                context.read<DashboardState>().value = {
+                  'pos': review.sentimentScore['pos'],
+                  'neg': review.sentimentScore['neg'],
+                  'neu': review.sentimentScore['neu'],
+                  'cnt': review.nWords,
+                  'txt': review.text,
+                  'h-score': review.highestScorePercentage,
+                  'h-label': review.highestLabel,
+                },
+                controller.text = review.text,
+              },
+              child: Container(
+                height: 170,
+                decoration: BoxDecoration(
+                  color: kYellowColor.withOpacity(0.5),
+                  borderRadius: kBorderRadius,
+                ),
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      review.createdTime.toDate().toString(),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: sentimentColors[review.highestLabel],
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        review.highestScorePercentage?.toStringAsFixed(2) ??
-                            '0',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          review.createdTime.toDate().toString(),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                      ),
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: sentimentColors[review.highestLabel],
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            review.highestScorePercentage?.toStringAsFixed(2) ??
+                                '0',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                    const SizedBox(height: 15),
+                    Text(
+                      review.text,
+                      textAlign: TextAlign.justify,
                     )
                   ],
                 ),
-                const SizedBox(height: 15),
-                Text(
-                  review.text,
-                  textAlign: TextAlign.justify,
-                )
-              ],
+              ),
             ),
           );
         },
@@ -259,8 +310,11 @@ class ReviewsList extends StatelessWidget {
 }
 
 class ReviewAnalysisWidget extends StatefulWidget {
+  final TextEditingController controller;
+
   const ReviewAnalysisWidget({
     Key? key,
+    required this.controller,
   }) : super(key: key);
 
   @override
@@ -268,8 +322,6 @@ class ReviewAnalysisWidget extends StatefulWidget {
 }
 
 class _ReviewAnalysisWidgetState extends State<ReviewAnalysisWidget> {
-  final TextEditingController controller = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     return CardContainer(
@@ -281,103 +333,146 @@ class _ReviewAnalysisWidgetState extends State<ReviewAnalysisWidget> {
               child: RoundedTextField(
                 maxLines: 12,
                 maxLength: 200,
-                controller: controller,
+                controller: widget.controller,
               ),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Material(
-                  color: kPrimaryColor,
-                  clipBehavior: Clip.hardEdge,
-                  shape: const CircleBorder(),
-                  child: IconButton(
-                    iconSize: 25,
-                    padding: const EdgeInsets.all(15),
-                    color: Colors.white,
-                    onPressed: () => {
-                      setState(
-                        () {
-                          if (context
-                              .read<SpeechToTextController>()
-                              .isListening) {
-                            context.read<SpeechToTextController>().stop();
-                          } else {
-                            context
-                                .read<SpeechToTextController>()
-                                .listen(((p0) {
-                              setState(() {
-                                if (p0.isConfident()) {
-                                  controller.text += "${p0.recognizedWords} ";
-                                }
-                              });
-                            }));
-                          }
-                        },
-                      )
-                    },
-                    icon: context.read<SpeechToTextController>().isListening
-                        ? const Icon(Icons.mic)
-                        : const Icon(Icons.mic_off),
-                  ),
+                MyIconButton(
+                  icon: (context.read<SpeechToTextController>().isListening)
+                      ? Icons.mic
+                      : Icons.mic_off,
+                  onPressed: () => {
+                    setState(
+                      () {
+                        if (context
+                            .read<SpeechToTextController>()
+                            .isListening) {
+                          context.read<SpeechToTextController>().stop();
+                        } else {
+                          context.read<SpeechToTextController>().listen(((p0) {
+                            setState(() {
+                              if (p0.isConfident()) {
+                                widget.controller.text +=
+                                    "${p0.recognizedWords} ";
+                              }
+                            });
+                          }));
+                        }
+                      },
+                    )
+                  },
                 ),
                 const Expanded(child: SizedBox()),
-                MyTextButton(
-                  color: kYellowColor,
-                  title: "Anlayze Now",
-                  onPressed: () async {
-                    await context
-                        .read<APIController>()
-                        .predict(controller.text)
-                        .then((sentimentPred) {
-                      if (sentimentPred != null) {
-                        context.read<ValueNotifier<Map<String, num>>>().value =
-                            {
-                          'pos': sentimentPred['positive']!,
-                          'neg': sentimentPred['negative']!,
-                          'neu': sentimentPred['neutral']!,
-                          'cnt': controller.text.split(' ').length,
-                        };
-                      }
-                    });
+                MyIconButton(
+                  icon: Icons.clear_outlined,
+                  onPressed: () {
+                    context.read<IDType>().value = null;
+                    context.read<DashboardState>().value = {
+                      'pos': 0,
+                      'neg': 0,
+                      'neu': 0,
+                      'cnt': 0,
+                      'txt': 0,
+                      'h-score': 0,
+                      'h-label': 'Undefined',
+                    };
+                    widget.controller.clear();
                   },
                 ),
                 const SizedBox(width: 20),
-                MyTextButton(
-                  title: "Store Review",
-                  onPressed: () async {
-                    var val =
-                        context.read<ValueNotifier<Map<String, num>>>().value;
+                SizedBox(
+                  width: 180,
+                  child: MyTextButton(
+                    color: kYellowColor,
+                    title: (context.watch<IDType>().value != null)
+                        ? "Re-Analyze"
+                        : "Analyze Now",
+                    onPressed: () async {
+                      String txt = widget.controller.text;
 
-                    var highestLabel = "";
-                    var highestScorePercentage = 0.0;
+                      await context
+                          .read<APIController>()
+                          .predict(txt)
+                          .then((sentimentPred) {
+                        if (sentimentPred != null) {
+                          var label = "Undefined";
+                          var highest = 0.0;
 
-                    val.forEach((key, value) {
-                      if (key != 'cnt') {
-                        if (value > highestScorePercentage) {
-                          highestScorePercentage = value.toDouble();
-                          highestLabel = key;
+                          sentimentPred.forEach((key, value) {
+                            if (key != 'cnt' && key != 'txt' && key != 'id') {
+                              if (value > highest) {
+                                highest = value;
+                                label = sentimentLabelsRev[key]!;
+                              }
+                            }
+                          });
+
+                          highest *= 100;
+
+                          context.read<DashboardState>().value = {
+                            'pos': sentimentPred['positive']!,
+                            'neg': sentimentPred['negative']!,
+                            'neu': sentimentPred['neutral']!,
+                            'cnt': txt.split(' ').length,
+                            'txt': txt,
+                            'h-score': highest,
+                            'h-label': label,
+                          };
                         }
-                      }
-                    });
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(width: 20),
+                SizedBox(
+                  width: 180,
+                  child: MyTextButton(
+                    title: (context.watch<IDType>().value != null)
+                        ? "Update Review"
+                        : "Store Review",
+                    onPressed: () async {
+                      var val = context.read<DashboardState>().value;
 
-                    highestScorePercentage *= 100;
-
-                    Review review = Review(
-                        controller.text,
+                      Review review = Review(
+                        val['txt'],
                         val['cnt']?.toInt() ?? 0,
-                        highestLabel,
-                        highestScorePercentage,
+                        val['h-label'],
+                        val['h-score'],
                         {
                           'pos': val['pos']?.toDouble() ?? 0.00,
                           'neg': val['neg']?.toDouble() ?? 0.00,
                           'neu': val['neu']?.toDouble() ?? 0.00,
                         },
-                        Timestamp.now());
+                        Timestamp.now(),
+                      );
 
-                    log("Storing review: ${review.toString()}");
-                    await context.read<ReviewModel>().addReview(review);
-                  },
+                      log("Storing review: ${review.toString()}");
+
+                      String? id = context.read<IDType>().value;
+
+                      context.read<IDType>().value = null;
+                      context.read<DashboardState>().value = {
+                        'pos': 0,
+                        'neg': 0,
+                        'neu': 0,
+                        'cnt': 0,
+                        'txt': 0,
+                        'h-score': 0,
+                        'h-label': 'Undefined',
+                      };
+                      widget.controller.clear();
+
+                      if (id != null) {
+                        await context
+                            .read<ReviewModel>()
+                            .updateReview(id, review.toMap());
+                      } else {
+                        await context.read<ReviewModel>().addReview(review);
+                      }
+                    },
+                  ),
                 )
               ],
             ),
@@ -408,7 +503,7 @@ class TextCountWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                "${context.watch<ValueNotifier<Map<String, num>>>().value['cnt']}",
+                "${context.watch<DashboardState>().value['cnt']}",
                 style: const TextStyle(
                   fontSize: 35,
                   fontWeight: FontWeight.bold,
@@ -445,20 +540,8 @@ class RingChartWidget extends StatelessWidget {
         padding: const EdgeInsets.symmetric(
           vertical: 15,
         ),
-        child: Consumer<ValueNotifier<Map<String, num>>>(
+        child: Consumer<DashboardState>(
           builder: (context, notifier, child) {
-            var label = "Undefined";
-            var highest = 0.0;
-
-            notifier.value.forEach((key, value) {
-              if (key != 'cnt') {
-                if (value > highest) {
-                  highest = value.toDouble() * 100;
-                  label = sentimentLabels[key]!;
-                }
-              }
-            });
-
             return Stack(
               children: [
                 PieChart(
@@ -485,14 +568,15 @@ class RingChartWidget extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        "${highest.toInt()}%",
+                        "${notifier.value['h-score'].toInt()}%",
                         style: const TextStyle(
                           fontSize: kBigTitleFontSize,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
-                        label,
+                        sentimentLabels[notifier.value['h-label']] ??
+                            'Undefined',
                         style: TextStyle(
                           fontSize: kNormalFontSize,
                           color: Colors.black.withOpacity(0.5),

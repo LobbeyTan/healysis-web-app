@@ -27,17 +27,23 @@ const List<Map<String, dynamic>> kMenuItem = [
     "icon": Icons.dataset,
     "route": "/dataset",
   },
-  {
-    "title": "Settings",
-    "icon": Icons.settings,
-    "route": "/setting",
-  },
+  // {
+  //   "title": "Settings",
+  //   "icon": Icons.settings,
+  //   "route": "/setting",
+  // },
 ];
 
 const Map<String, String> sentimentLabels = {
   'pos': 'Positive',
   'neg': 'Negative',
   'neu': 'Neutral',
+};
+
+const Map<String, String> sentimentLabelsRev = {
+  'positive': 'pos',
+  'negative': 'neg',
+  'neutral': 'neu',
 };
 
 const Map<String, Color> sentimentColors = {

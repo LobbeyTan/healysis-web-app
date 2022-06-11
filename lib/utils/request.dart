@@ -4,7 +4,10 @@ import 'dart:developer';
 import 'package:http/http.dart';
 
 class APIController {
-  static const baseUri = "http://103.252.118.44:5000";
+  static bool usingLocal = false;
+  static String baseUri = APIController.usingLocal
+      ? "http://127.0.0.1:5000"
+      : "https://103.252.118.44:5000";
 
   Future<Response?> getData(
     String endpoint, {

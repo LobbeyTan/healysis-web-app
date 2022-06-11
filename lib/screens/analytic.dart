@@ -4,7 +4,6 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 import 'package:web_app/constants/color.dart';
 import 'package:web_app/constants/config.dart';
-import 'package:web_app/constants/data.dart';
 import 'package:web_app/utils/request.dart';
 import 'package:web_app/widgets/container.dart';
 import 'package:web_app/widgets/indicator.dart';
@@ -103,18 +102,24 @@ class AnalyticScreen extends StatelessWidget {
                             Expanded(
                               child: CardContainer(
                                 child: Top30Words(
-                                  maxY: 80,
+                                  maxY: 30,
                                   title: "Top 15 Positive Emotion Words",
-                                  data: top30Positive,
+                                  data: (snapshot.data!["pos_count"]!
+                                          as List<dynamic>)
+                                      .map((e) => e as List<dynamic>)
+                                      .toList(),
                                 ),
                               ),
                             ),
                             Expanded(
                               child: CardContainer(
                                 child: Top30Words(
-                                  maxY: 1500,
+                                  maxY: 150,
                                   title: "Top 15 Negative Emotion Words",
-                                  data: top30Negative,
+                                  data: (snapshot.data!["neg_count"]!
+                                          as List<dynamic>)
+                                      .map((e) => e as List<dynamic>)
+                                      .toList(),
                                 ),
                               ),
                             ),
@@ -711,6 +716,9 @@ class _ReviewsCountLineChartState extends State<ReviewsCountLineChart> {
       case 90:
         text = '90';
         break;
+      case 110:
+        text = '110';
+        break;
       default:
         return Container();
     }
@@ -773,7 +781,7 @@ class _ReviewsCountLineChartState extends State<ReviewsCountLineChart> {
       minX: 0,
       maxX: 6,
       minY: 30,
-      maxY: 100,
+      maxY: 120,
       lineBarsData: [
         LineChartBarData(
           spots: widget.reviewCount

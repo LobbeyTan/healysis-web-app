@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
 class Review {
+  String? id;
   String text;
   int nWords;
   String? highestLabel;
@@ -18,8 +19,9 @@ class Review {
     this.highestLabel,
     this.highestScorePercentage,
     this.sentimentScore,
-    this.createdTime,
-  );
+    this.createdTime, {
+    this.id,
+  });
 
   Map<String, dynamic> toMap() {
     return {
@@ -32,7 +34,7 @@ class Review {
     };
   }
 
-  factory Review.fromMap(Map<String, dynamic> map) {
+  factory Review.fromMap(Map<String, dynamic> map, {String? id}) {
     return Review(
       map['text'] ?? '',
       map['nWords']?.toInt() ?? 0,
@@ -40,6 +42,7 @@ class Review {
       map['highestScorePercentage']?.toDouble(),
       Map<String, double>.from(map['sentimentScore']),
       Timestamp.fromMicrosecondsSinceEpoch(map['createdTime']),
+      id: id,
     );
   }
 
@@ -49,6 +52,7 @@ class Review {
 
   factory Review.fromSnapshot(DocumentSnapshot snapshot) => Review.fromMap(
         snapshot.data()! as Map<String, dynamic>,
+        id: snapshot.id,
       );
 
   @override

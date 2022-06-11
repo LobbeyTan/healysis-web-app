@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +10,7 @@ import 'package:web_app/screens/analytic.dart';
 import 'package:web_app/screens/dashboard.dart';
 import 'package:web_app/screens/dataset.dart';
 import 'package:web_app/screens/setting.dart';
+import 'package:web_app/utils/extension.dart';
 import 'package:web_app/utils/request.dart';
 import 'package:web_app/utils/storage.dart';
 import 'package:web_app/utils/stt.dart';
@@ -19,6 +22,10 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  HttpOverrides.global = DevHttpOverrides();
+
+  APIController.usingLocal = true;
 
   runApp(const WebApp());
 }
@@ -34,7 +41,8 @@ class WebApp extends StatelessWidget {
         Provider(create: (_) => StorageController()),
         Provider(create: (_) => SpeechToTextController()),
         Provider(create: (_) => APIController()),
-        Provider(create: (_) => ReviewModel(firestore: FirebaseFirestore.instance))
+        Provider(
+            create: (_) => ReviewModel(firestore: FirebaseFirestore.instance))
       ],
       child: MaterialApp(
         title: 'Healysis',

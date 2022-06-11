@@ -47,3 +47,30 @@ class MyTextButton extends StatelessWidget {
     );
   }
 }
+
+class MyIconButton extends StatelessWidget {
+  final VoidCallback? onPressed;
+  final IconData icon;
+
+  const MyIconButton({
+    Key? key,
+    this.onPressed,
+    required this.icon,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: kPrimaryColor,
+      clipBehavior: Clip.hardEdge,
+      shape: const CircleBorder(),
+      child: IconButton(
+        iconSize: 25,
+        padding: const EdgeInsets.all(15),
+        color: Colors.white,
+        onPressed: onPressed,
+        icon: Icon(icon),
+      ),
+    );
+  }
+}
