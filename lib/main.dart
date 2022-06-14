@@ -25,7 +25,7 @@ void main() async {
 
   HttpOverrides.global = DevHttpOverrides();
 
-  APIController.usingLocal = true;
+  APIController.usingLocal = false;
 
   runApp(const WebApp());
 }
