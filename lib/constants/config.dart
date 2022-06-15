@@ -13,12 +13,12 @@ const double kNormalFontSize = 18;
 
 const List<Map<String, dynamic>> kMenuItem = [
   {
-    "title": "Dashboard",
+    "title": "Home",
     "icon": Icons.dashboard_customize,
     "route": "/",
   },
   {
-    "title": "Analytic",
+    "title": "Dashboard",
     "icon": Icons.analytics,
     "route": "/analytic",
   },
